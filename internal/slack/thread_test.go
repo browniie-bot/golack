@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/longkey1/golack/internal/model"
 	"github.com/slack-go/slack"
 )
 
@@ -80,6 +81,61 @@ func TestConvertReplyMessage(t *testing.T) {
 				t.Errorf("Timestamp = %v, want %v", got.Timestamp, want)
 			}
 		})
+	}
+}
+
+func TestConvertReactions(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name      string
+		reactions []slack.ItemReaction
+		want      []model.Reaction
+	}{
+		{
+			name:      "no reactions",
+			reactions: nil,
+			want:      nil,
+		},
+		{
+			name: "reactions are copied in order",
+			reactions: []slack.ItemReaction{
+				{Name: "thumbsup", Count: 2, Users: []string{"U123", "U456"}},
+				{Name: "eyes", Count: 1, Users: []string{"U789"}},
+			},
+			want: []model.Reaction{
+				{Name: "thumbsup", Count: 2, Users: []string{"U123", "U456"}},
+				{Name: "eyes", Count: 1, Users: []string{"U789"}},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := convertReactions(tt.reactions)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("convertReactions() = %+v, want %+v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestConvertReplyMessageReactions(t *testing.T) {
+	t.Parallel()
+
+	c := &Client{}
+	msg := slack.Message{Msg: slack.Msg{
+		Timestamp: "1716192523.567890",
+		Reactions: []slack.ItemReaction{{Name: "tada", Count: 1, Users: []string{"U123"}}},
+	}}
+
+	got := c.convertReplyMessage(msg, "C123", "general")
+
+	want := []model.Reaction{{Name: "tada", Count: 1, Users: []string{"U123"}}}
+	if !reflect.DeepEqual(got.Reactions, want) {
+		t.Errorf("Reactions = %+v, want %+v", got.Reactions, want)
 	}
 }
 

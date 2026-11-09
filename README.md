@@ -331,6 +331,7 @@ Output is in JSON format, grouped by thread.
 | `timestamp` | Parsed to ISO 8601 format |
 | `mentions` | Extracted from `<@USER\|name>` patterns in text |
 | `attached_links` | Extracted from text and attachments |
+| `reactions` | Emoji reactions (`name`, `count`, `users`). Present for messages fetched via channel history or thread replies (`get`, `history`, and `list` hits expanded to threads); omitted when there are none |
 | `is_thread_parent` | Calculated from `thread_ts` |
 
 ```json
@@ -349,6 +350,9 @@ Output is in JSON format, grouped by thread.
         "timestamp": "2025-01-15T10:30:00Z",
         "channel": "general",
         "channel_id": "C12345678",
+        "reactions": [
+          { "name": "thumbsup", "count": 2, "users": ["U12345678", "U87654321"] }
+        ],
         "thread_ts": "1716192523.567890",
         "is_thread_parent": true
       }

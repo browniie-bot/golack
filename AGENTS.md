@@ -50,7 +50,7 @@ Pushing a `v*` tag triggers `.github/workflows/gorelease.yml`, which builds mult
   - `client.go` — `Client` wrapping the API client
   - `url.go` — `ParseURL` extracts channel ID / message TS / thread TS from a Slack archive URL; `normalizeTimestamp` converts `p1716192523567890` to `1716192523.567890`
   - `search.go` — `SearchMessages` (search.messages): `buildSearchQueries` emits one query per mention (Slack search has no OR for `to:`, so mentions are OR-merged and deduplicated), `buildBaseQueryParts` adds `from:` / `in:` / `-in:` / `after:` / `before:` and always excludes DMs (`-is:dm -is:mpdm`); thread hits are expanded via `GetThreadReplies`; also message conversion and mention/link extraction from search matches
-  - `thread.go` — `GetThreadReplies` / `GetThread` (conversations.replies, paged), `convertReplyMessage` and mention/link extraction from raw messages
+  - `thread.go` — `GetThreadReplies` / `GetThread` (conversations.replies, paged), `convertReplyMessage` (including `convertReactions`) and mention/link extraction from raw messages
   - `history.go` — `GetChannelHistory` (conversations.history, paged, inclusive unix bounds), `ListAllChannels` (conversations.list, optional archived-channel exclusion), `ResolveChannels` / `IsChannelID` (channel names vs `C…` IDs)
   - `channel.go` — `GetChannelInfo` / `GetChannelName` (falls back to the ID on error)
   - `resolver.go` — `Resolver` rewrites Slack mrkdwn tokens (`<@U…>`, `<#C…>`, `<!subteam^…>`, `<!here|channel|everyone>`) in message content to human-readable names, with mutex-protected per-type caches; used by `--resolve-ids`
@@ -71,6 +71,7 @@ Pushing a `v*` tag triggers `.github/workflows/gorelease.yml`, which builds mult
 - `list` filters via search.messages, so `--mention` cannot match `@channel`/`@here` broadcasts; `history` collects everything in a channel and exists for exactly that case
 - Progress and warnings are written to stderr; stdout carries only the JSON document, so output is always pipeable (`--output FILE` writes to a file instead)
 - Failed thread fetches during expansion are warnings, not fatal errors: the parent message is kept and collection continues
+- Reactions are only available from conversations.history / conversations.replies; search.messages does not return them, so `list` hits that are not expanded to threads carry no `reactions`. Reaction user IDs are not rewritten by `--resolve-ids`
 - `--resolve-ids` post-processes collected threads through the `Resolver` (requires `users:read` / `usergroups:read` scopes); IDs that cannot be resolved fall back to the raw ID
 
 ## Testing

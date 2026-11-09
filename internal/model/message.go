@@ -4,18 +4,26 @@ import "time"
 
 // Message represents a Slack message
 type Message struct {
-	ID             string    `json:"id"`
-	Type           string    `json:"type"`
-	Content        string    `json:"content"`
-	Author         string    `json:"author"`
-	Timestamp      time.Time `json:"timestamp"`
-	Channel        string    `json:"channel"`
-	ChannelID      string    `json:"channel_id"`
-	Permalink      string    `json:"permalink,omitempty"`
-	Mentions       []string  `json:"mentions,omitempty"`
-	AttachedLinks  []string  `json:"attached_links,omitempty"`
-	ThreadTS       string    `json:"thread_ts"`
-	IsThreadParent bool      `json:"is_thread_parent"`
+	ID             string     `json:"id"`
+	Type           string     `json:"type"`
+	Content        string     `json:"content"`
+	Author         string     `json:"author"`
+	Timestamp      time.Time  `json:"timestamp"`
+	Channel        string     `json:"channel"`
+	ChannelID      string     `json:"channel_id"`
+	Permalink      string     `json:"permalink,omitempty"`
+	Mentions       []string   `json:"mentions,omitempty"`
+	AttachedLinks  []string   `json:"attached_links,omitempty"`
+	Reactions      []Reaction `json:"reactions,omitempty"`
+	ThreadTS       string     `json:"thread_ts"`
+	IsThreadParent bool       `json:"is_thread_parent"`
+}
+
+// Reaction represents an emoji reaction on a Slack message
+type Reaction struct {
+	Name  string   `json:"name"`
+	Count int      `json:"count"`
+	Users []string `json:"users,omitempty"`
 }
 
 // Thread represents a Slack thread with its messages

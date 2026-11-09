@@ -132,9 +132,26 @@ func (c *Client) convertReplyMessage(msg slack.Message, channelID, channelName s
 		ChannelID:      channelID,
 		Mentions:       c.extractMentionsFromText(msg.Text),
 		AttachedLinks:  c.extractLinksFromMessage(msg),
+		Reactions:      convertReactions(msg.Reactions),
 		ThreadTS:       threadTS,
 		IsThreadParent: threadTS == "" || threadTS == msg.Timestamp,
 	}
+}
+
+func convertReactions(reactions []slack.ItemReaction) []model.Reaction {
+	if len(reactions) == 0 {
+		return nil
+	}
+
+	result := make([]model.Reaction, 0, len(reactions))
+	for _, r := range reactions {
+		result = append(result, model.Reaction{
+			Name:  r.Name,
+			Count: r.Count,
+			Users: r.Users,
+		})
+	}
+	return result
 }
 
 func (c *Client) extractMentionsFromText(text string) []string {
